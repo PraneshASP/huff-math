@@ -7,6 +7,7 @@ describe("Math", function () {
     math = await Math.deploy();
     await math.deployed();
   });
+
   it("Math is deployed", async function () {
     expect(math.address).to.not.equal(
       "0x0000000000000000000000000000000000000000"
@@ -20,5 +21,13 @@ describe("Math", function () {
     expect(
       (await math.callStatic.addNumbers(num1, num2)).toString()
     ).to.be.equal((num1 + num2).toString());
+  });
+
+  it("Should subtract numbers", async function () {
+    let num1 = 13,
+      num2 = 10;
+    let expected = num1 > num2 ? OVERLOW : num2 - num1;
+    await math.subNumbers(num1, num2);
+    expect(await math.callStatic.subNumbers(num1, num2)).to.be.equal(expected);
   });
 });
