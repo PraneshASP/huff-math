@@ -42,4 +42,13 @@ describe("Math", function () {
       Math.abs(num1 - num2)
     );
   });
+
+  it("Should multiply numbers", async function () {
+    let num1 = 13,
+      num2 = 10;
+    await math.multiplyNumbers(num1, num2);
+    expect(await math.callStatic.multiplyNumbers(num1, num2)).to.be.equal(
+      num1 * num2
+    );
+  });
 });
