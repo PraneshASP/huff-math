@@ -3,6 +3,7 @@
 #define function addNumbers(uint256,uint256) nonpayable returns (uint256)
 #define function subNumbers(uint256,uint256) nonpayable returns (uint256)
 #define function multiplyNumbers(uint256,uint256) nonpayable returns (uint256)
+#define function divideNumbers(uint256,uint256) nonpayable returns (uint256)
 #define function abs(uint256,uint256) nonpayable returns (uint256)
 
 
@@ -48,9 +49,18 @@
     0x04 calldataload   // [num1] STACK=> { num1 }
     0x24 calldataload   // [num2] STACK=> { num2, num1 }
     mul                 // [multiply num1 & num2] STACK=> { PRODUCT }                
-    [ANS] mstore        // Store diff in memory.                         
-    0x20 [ANS] return   // Return difference
+    [ANS] mstore        // Store product in memory.                         
+    0x20 [ANS] return   // Return product
 }
+
+#define macro DIVIDE_NUMBERS() = takes (2) returns (1) {
+    0x04 calldataload   // [num1] STACK=> { num1 }
+    0x24 calldataload   // [num2] STACK=> { num2, num1 }
+    div                 // [divide num1 & num2] STACK=> { QUOTIENT }                
+    [ANS] mstore        // Store quotient in memory.                         
+    0x20 [ANS] return   // Return quotient
+}
+
 
 #define macro MAIN() = takes (0) returns (0) {
     // Identify which function is being called.
@@ -64,7 +74,7 @@
     dup1 0x9c0a2b51 eq  subNumbers      jumpi
     dup1 0xe093a157 eq  abs             jumpi
     dup1 0xd3f3cd7b eq  multiplyNumbers jumpi
-
+    dup1 0x8fce12ed eq  divideNumbers   jumpi
 
     addNumbers:
         ADD_NUMBERS()
@@ -77,6 +87,9 @@
 
     multiplyNumbers:
         MULTIPLY_NUMBERS()
+
+     divideNumbers:
+        DIVIDE_NUMBERS()
  
 }
 

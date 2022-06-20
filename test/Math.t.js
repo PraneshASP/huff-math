@@ -51,4 +51,13 @@ describe("Math", function () {
       num1 * num2
     );
   });
+
+  it("Should divide numbers", async function () {
+    let num1 = 13,
+      num2 = 100;
+    await math.divideNumbers(num1, num2);
+    expect(await math.callStatic.divideNumbers(num1, num2)).to.be.equal(
+      parseInt(num2 / num1)
+    );
+  });
 });
