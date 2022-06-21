@@ -1,0 +1,5 @@
+[default]
+src = 'contracts'
+out = 'artifacts'
+libs = ["node_modules", "lib"]
+# See more config options https://github.com/foundry-rs/foundry/tree/master/config
