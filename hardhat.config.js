@@ -15,4 +15,7 @@ module.exports = {
   huff: {
     version: "0.0.23",
   },
+  paths: {
+    sources: "./src",
+  },
 };

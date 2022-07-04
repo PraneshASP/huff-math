@@ -42,26 +42,17 @@ To compile your contracts, write:
 npm run compile
 ```
 
-To test your contracts, write:
+To run unit tests:
 
 ```sh
 npm run test
 ```
 
-For more advanced Hardhat usage, please check the [Hardhat documentation](https://hardhat.org/getting-started/).
-
-### Running Fuzz Tests
-
-> As I was facing some issues with the [foundry-huff template](https://github.com/huff-language/foundry-huff), I configured the fuzz tests to run on the local `anvil` node (forked)
-
-Start the anvil node:
+To run fuzz tests:
 
 ```sh
-anvil -f <INFURA_URL>
-```
-
-In a new terminal, run the fuzz tests:
-
-```
 forge test
 ```
+
+_For more advanced Foundry usage, please check the [Foundry book](https://book.getfoundry.sh/)._ <br/>
+_For more advanced Hardhat usage, please check the [Hardhat documentation](https://hardhat.org/getting-started/)._

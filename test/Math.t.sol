@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
+import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
 /// @notice Interface for the Math contract
 interface IMath {
@@ -18,12 +19,12 @@ interface IMath {
 
 contract MathTest is Test {
     IMath public math;
-
     uint256 public constant MAX = type(uint256).max;
 
     function setUp() public {
+        address addr = HuffDeployer.deploy("Math");
         // Hardcoding the deployed address as there are some issues with --ffi and huffc
-        math = IMath(0x10ec4df6A9C43b393fcfc39D639C09EBCa0a9b5d);
+        math = IMath(addr);
     }
 
     function testAdd(uint256 a, uint256 b) public {
