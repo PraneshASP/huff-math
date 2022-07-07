@@ -39,13 +39,13 @@ npm i
 To compile your contracts, write:
 
 ```sh
-npm run compile
+forge build
 ```
 
 To run the tests:
 
 ```sh
-npm run test
+forge test
 ```
 
 _For more advanced Foundry usage, please check the [Foundry book](https://book.getfoundry.sh/)._ <br/>
