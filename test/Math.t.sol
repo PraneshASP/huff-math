@@ -20,6 +20,7 @@ interface IMath {
 contract MathTest is Test {
     IMath public math;
     uint256 public constant MAX = type(uint256).max;
+    uint256 public constant MIN = type(uint256).min;
 
     function setUp() public {
         address addr = HuffDeployer.deploy("Math");
@@ -27,28 +28,80 @@ contract MathTest is Test {
         math = IMath(addr);
     }
 
-    function testAdd(uint256 a, uint256 b) public {
-        // overflow not handled in the contract
-        vm.assume(a < MAX / 2 && b < MAX / 2);
-        require(math.addNumbers(a, b) == a + b);
+    function testAddNumbers() public {
+        uint256 result = math.addNumbers(420, 69);
+        assertEq(result, 489);
     }
 
-    function testSub(uint256 a, uint256 b) public {
-        vm.assume(b > a);
-        require(math.subNumbers(a, b) == b - a);
+    function testAddNumbers_fuzz(uint256 a, uint256 b) public {
+        unchecked {
+            uint256 c = a + b;
+
+            if (c > MAX) {
+                vm.expectRevert();
+                math.addNumbers(a, b);
+                return;
+            }
+
+            uint256 result = math.addNumbers(a, b);
+            assertEq(result, a + b);
+        }
     }
 
-    function testMul(uint256 a, uint256 b) public {
-        vm.assume((b > 0 && a < MAX / b) || (a > 0 && b < MAX / a));
-        require(math.multiplyNumbers(a, b) == a * b);
+    function testSubNumbers() public {
+        uint256 result = math.subNumbers(420, 69);
+        assertEq(result, 351);
     }
 
-    function testDiv(uint256 a, uint256 b) public {
-        vm.assume(a > 0);
-        require(math.divideNumbers(a, b) == b / a);
+    function testSubNumbers_fuzz(uint256 a, uint256 b) public {
+        unchecked {
+            uint256 c = a - b;
+            if (c < MIN) {
+                vm.expectRevert();
+                math.subNumbers(a, b);
+                return;
+            }
+
+            uint256 result = math.subNumbers(a, b);
+            assertEq(result, a - b);
+        }
     }
 
-    function testAbs(uint256 a, uint256 b) public view {
+    function testMultiplyNumbers() public {
+        uint256 result = math.multiplyNumbers(100, 69);
+        assertEq(result, 6900);
+    }
+
+    function testMultiplyNumbers_fuzz(uint256 a, uint256 b) public {
+        unchecked {
+            uint256 c = a * b;
+
+            if (c > MAX) {
+                vm.expectRevert();
+                math.multiplyNumbers(a, b);
+                return;
+            }
+
+            uint256 result = math.multiplyNumbers(a, b);
+            assertEq(result, a * b);
+        }
+    }
+
+    function testDivideNumbers() public {
+        uint256 result = math.divideNumbers(200, 10);
+        assertEq(result, 20);
+    }
+
+    function testDivideNumbers_fuzz(uint256 a, uint256 b) public {
+        vm.assume(b > 0);
+        assertEq(math.divideNumbers(a, b), a / b);
+    }
+
+    function testAbs() public view {
+        require(math.abs(1, 10) == 9);
+    }
+
+    function testAbs_fuzz(uint256 a, uint256 b) public view {
         uint256 _result = a > b ? a - b : b - a;
         require(math.abs(a, b) == _result);
     }

@@ -42,16 +42,10 @@ To compile your contracts, write:
 npm run compile
 ```
 
-To run unit tests:
+To run the tests:
 
 ```sh
 npm run test
-```
-
-To run fuzz tests:
-
-```sh
-forge test
 ```
 
 _For more advanced Foundry usage, please check the [Foundry book](https://book.getfoundry.sh/)._ <br/>
