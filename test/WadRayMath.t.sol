@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import "foundry-huff/HuffDeployer.sol";
+import "foundry-huff/HuffConfig.sol";
 import "forge-std/Test.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
@@ -11,26 +13,40 @@ interface IWadRayMath {
 
 contract WadRayMathTest is Test {
     IWadRayMath public sut;
-    uint256 public constant MAX = type(uint256).max;
-    uint256 public constant MIN = type(uint256).min;
 
+    HuffConfig public huffDepl;
+
+    /// @dev Setup the testing environment.
     function setUp() public {
-        address addr = HuffDeployer.deploy("WadRayMath");
+        uint256 WAD = 1e18;
 
-        /// System under test
-        sut = IWadRayMath(addr);
+        huffDepl = HuffDeployer.config();
+
+        bytes memory args = (abi.encode(WAD));
+
+        sut = IWadRayMath(huffDepl.with_args(args).deploy("WadRayMath"));
     }
+
+    // function setUp() public {
+    //     address addr = HuffDeployer.deploy("WadRayMath");
+
+    //     /// System under test
+    //     sut = IWadRayMath(addr);
+    // }
 
     function testDeployment() public {
         assert(address(sut) != address(0));
     }
 
-    function testWadMul_ShouldReturnZero_WhenOneOfTheInputsAreZero() public {
-        uint256 result = sut.wadMul(0, 1);
-        assertEq(result, 0);
-        result = sut.wadMul(1, 0);
-        assertEq(result, 0);
-        result = sut.wadMul(0, 0);
-        assertEq(result, 0);
+    function testWadMulEdgeCases() public {
+        assertEq(sut.wadMul(0, 1e18), 0);
+        assertEq(sut.wadMul(1e18, 0), 0);
+        assertEq(sut.wadMul(0, 0), 0);
+    }
+
+    function testWadMul() public {
+        assertEq(sut.wadMul(2.5e18, 0.5e18), 1.25e18);
+        assertEq(sut.wadMul(3e18, 1e18), 3e18);
+        assertEq(sut.wadMul(369, 271), 0);
     }
 }

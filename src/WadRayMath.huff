@@ -4,18 +4,15 @@
  
 
 
-// /* Storage Slot */
-// #define constant ANS = FREE_STORAGE_POINTER()
+// /* Constants*/
+#define constant WAD = 0xde0b6b3a7640000
+#define constant HALF_WAD = 0x6f05b59d3b20000
+#define constant RAY = FREE_STORAGE_POINTER()
+#define constant HALF_RAY = FREE_STORAGE_POINTER()
+#define constant WAD_RAY_RATIO = FREE_STORAGE_POINTER()
+#define constant TYPE_UINT_MAX =  0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 
-// /* Constants */
-#define constant WAD = 0xde0b6b3a76400000000000000000000000000000000000000000000000000000
-#define constant HALF_WAD = 0x6f05b59d3b200000000000000000000000000000000000000000000000000000
-// #define constant RAY = FREE_STORAGE_POINTER()
-// #define constant HALF_RAY = FREE_STORAGE_POINTER()
-// #define constant WAD_RAY_RATIO = FREE_STORAGE_POINTER()
-
-#define constant TYPE_UINT_MAX = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-
+ 
 
 /* Methods */
 #define macro WAD_MUL() = takes (0) returns (0) {
@@ -28,19 +25,35 @@
     0x24 calldataload    // [num2] STACK=> { num1, num2 }
     dup1
     iszero return_zero jumpi
-    return
+     
 
-    ///(type(uint256).max - halfWAD) / num2 > num1
-    // halfWAD
-    // TYPE_UINT_MAX
-    // sub
+    ///(uint256_max - HALF_WAD) / num2 > num1
+    [HALF_WAD] 
+    [TYPE_UINT_MAX]
+    sub 
+    dup2
+    dup2
+    div
+    dup4
+    swap1 
+    gt return_result jumpi
     
-
     return_zero:
-    0x00
-    0x00 mstore
-    0x20 0x00 return
- 
+        0x00
+        0x00 mstore
+        0x20 0x00 return
+    
+    return_result:
+        pop
+        mul
+        [HALF_WAD]
+        add
+        [WAD]
+        swap1
+        div
+        0x00 mstore
+        0x20 0x00 return
+
 }
 
  
@@ -54,23 +67,12 @@
 
     // Jump table
     dup1 __FUNC_SIG(wadMul) eq  wad_mul jumpi
-    
-
 
     wad_mul:
         WAD_MUL()
 
-    // subNumbers:
-    //     SUB_NUMBERS()
-   
-    // multiplyNumbers:
-    //     MULTIPLY_NUMBERS()
-
-    //  divideNumbers:
-    //     DIVIDE_NUMBERS()
-
-    // abs:
-    //     ABS()
-
 }
 
+
+
+ 
