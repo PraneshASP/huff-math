@@ -14,18 +14,27 @@
 // #define constant HALF_RAY = FREE_STORAGE_POINTER()
 // #define constant WAD_RAY_RATIO = FREE_STORAGE_POINTER()
 
+#define constant TYPE_UINT_MAX = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+
+
 /* Methods */
 #define macro WAD_MUL() = takes (0) returns (0) {
 
     /// Short circuit: Return zero if one of the inputs are zero
     0x04 calldataload    // [num1] STACK=> { num1 }
+    dup1
     iszero return_zero jumpi
-    pop
+    
     0x24 calldataload    // [num2] STACK=> { num1, num2 }
+    dup1
     iszero return_zero jumpi
-    pop
+    return
 
     ///(type(uint256).max - halfWAD) / num2 > num1
+    // halfWAD
+    // TYPE_UINT_MAX
+    // sub
+    
 
     return_zero:
     0x00
