@@ -1,0 +1,67 @@
+
+/* Interface */
+#define function wadMul(uint256,uint256) nonpayable returns (uint256)
+ 
+
+
+// /* Storage Slot */
+// #define constant ANS = FREE_STORAGE_POINTER()
+
+// /* Constants */
+#define constant WAD = 0xde0b6b3a76400000000000000000000000000000000000000000000000000000
+#define constant HALF_WAD = 0x6f05b59d3b200000000000000000000000000000000000000000000000000000
+// #define constant RAY = FREE_STORAGE_POINTER()
+// #define constant HALF_RAY = FREE_STORAGE_POINTER()
+// #define constant WAD_RAY_RATIO = FREE_STORAGE_POINTER()
+
+/* Methods */
+#define macro WAD_MUL() = takes (0) returns (0) {
+
+    /// Short circuit: Return zero if one of the inputs are zero
+    0x04 calldataload    // [num1] STACK=> { num1 }
+    iszero return_zero jumpi
+    pop
+    0x24 calldataload    // [num2] STACK=> { num1, num2 }
+    iszero return_zero jumpi
+    pop
+
+    ///(type(uint256).max - halfWAD) / num2 > num1
+
+    return_zero:
+    0x00
+    0x00 mstore
+    0x20 0x00 return
+ 
+}
+
+ 
+
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called.
+    0x00 calldataload 
+    
+    // Extract the function singature
+    0xe0 shr
+
+    // Jump table
+    dup1 __FUNC_SIG(wadMul) eq  wad_mul jumpi
+    
+
+
+    wad_mul:
+        WAD_MUL()
+
+    // subNumbers:
+    //     SUB_NUMBERS()
+   
+    // multiplyNumbers:
+    //     MULTIPLY_NUMBERS()
+
+    //  divideNumbers:
+    //     DIVIDE_NUMBERS()
+
+    // abs:
+    //     ABS()
+
+}
+
