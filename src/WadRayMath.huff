@@ -1,7 +1,8 @@
 
 /* Interface */
 #define function wadMul(uint256,uint256) nonpayable returns (uint256)
- 
+#define function wadDiv(uint256,uint256) nonpayable returns (uint256)
+
 
 
 // /* Constants*/
@@ -56,6 +57,50 @@
 
 }
 
+
+#define macro WAD_DIV() = takes (0) returns (0) {
+    0x04  calldataload     
+      
+    0x24 calldataload       
+    dup1
+    iszero revert_tx jumpi
+    
+    // half-b
+    0x02
+    swap1
+    div
+    dup1
+    0x00 mstore
+    //(type(uint256).max - halfB) / WAD > a
+    [TYPE_UINT_MAX]
+    sub 
+    [WAD]
+    dup2
+    div
+    dup3
+    swap1 
+    gt return_result jumpi
+    
+    revert_tx:
+        revert
+
+    //(a * WAD + halfB) / b
+    return_result:
+        pop
+        [WAD]
+        dup2
+        mul
+        0x00 mload
+        add
+        0x00 mload
+        0x02
+        mul
+        swap1
+        div
+        0x00 mstore
+        0x20 0x00 return
+}
+
  
 
 #define macro MAIN() = takes (0) returns (0) {
@@ -67,9 +112,14 @@
 
     // Jump table
     dup1 __FUNC_SIG(wadMul) eq  wad_mul jumpi
+    dup1 __FUNC_SIG(wadDiv) eq  wad_div jumpi
+
 
     wad_mul:
         WAD_MUL()
+
+    wad_div:
+        WAD_DIV()    
 
 }
 
