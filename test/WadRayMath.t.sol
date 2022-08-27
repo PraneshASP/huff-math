@@ -9,6 +9,8 @@ import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 /// @notice Interface for the WadRayMath contract
 interface IWadRayMath {
     function wadMul(uint256, uint256) external view returns (uint256);
+
+    function wadDiv(uint256, uint256) external view returns (uint256);
 }
 
 contract WadRayMathTest is Test {
@@ -48,5 +50,19 @@ contract WadRayMathTest is Test {
         assertEq(sut.wadMul(2.5e18, 0.5e18), 1.25e18);
         assertEq(sut.wadMul(3e18, 1e18), 3e18);
         assertEq(sut.wadMul(369, 271), 0);
+    }
+
+    function testDivWadDown() public {
+        assertEq(sut.wadDiv(1.25e18, 0.5e18), 2.5e18);
+        assertEq(sut.wadDiv(3e18, 1e18), 3e18);
+        assertEq(sut.wadDiv(2, 100000000000000e18), 0);
+    }
+
+    function testDivWadDownEdgeCases() public {
+        assertEq(sut.wadDiv(0, 1e18), 0);
+    }
+
+    function testFailDivWadDownZeroDenominator() public {
+        sut.wadDiv(1e18, 0);
     }
 }
