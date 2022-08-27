@@ -4,6 +4,7 @@
 #define function wadDiv(uint256,uint256) nonpayable returns (uint256)
 #define function rayMul(uint256,uint256) nonpayable returns (uint256)
 #define function rayDiv(uint256,uint256) nonpayable returns (uint256)
+#define function rayToWad(uint256) nonpayable returns (uint256)
 
  
 
@@ -189,6 +190,35 @@
         0x20 0x00 return
 }
 
+#define macro RAY_TO_WAD() = takes (0) returns (0) {
+    0x04 calldataload    
+    dup1 iszero return_zero jumpi
+    [WAD_RAY_RATIO]
+    dup1
+    0x02
+    swap1
+    div
+    dup3
+    
+    add
+    dup1
+    dup3
+     
+    lt return_result jumpi
+    revert
+    
+    return_result:
+    pop
+    swap1
+    div
+    0x00 mstore
+    0x20 0x00 return
+
+    return_zero:
+        0x00
+        0x00 mstore
+        0x20 0x00 return
+}
  
 
 #define macro MAIN() = takes (0) returns (0) {
@@ -203,6 +233,7 @@
     dup1 __FUNC_SIG(wadDiv) eq  wad_div jumpi
     dup1 __FUNC_SIG(rayMul) eq  ray_mul jumpi
     dup1 __FUNC_SIG(rayDiv) eq  ray_div jumpi
+    dup1 __FUNC_SIG(rayToWad) eq  ray_to_wad jumpi
 
 
     wad_mul:
@@ -216,6 +247,9 @@
 
     ray_div:
         RAY_DIV() 
+
+    ray_to_wad:
+        RAY_TO_WAD() 
 
 }
 
