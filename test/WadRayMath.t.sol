@@ -13,6 +13,8 @@ interface IWadRayMath {
     function rayMul(uint256, uint256) external view returns (uint256);
 
     function rayDiv(uint256, uint256) external view returns (uint256);
+
+    function rayToWad(uint256) external view returns (uint256);
 }
 
 contract WadRayMathTest is Test {
@@ -80,5 +82,11 @@ contract WadRayMathTest is Test {
 
     function testFailDivRayDownZeroDenominator() public {
         sut.rayDiv(1e27, 0);
+    }
+
+    function testRayToWad() public {
+        assertEq(sut.rayToWad(0), 0);
+        assertEq(sut.rayToWad(1e27), 1e18);
+        assertEq(sut.rayToWad(50000e27), 50000e18);
     }
 }
