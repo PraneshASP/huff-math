@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "foundry-huff/HuffDeployer.sol";
-import "foundry-huff/HuffConfig.sol";
 import "forge-std/Test.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
@@ -13,30 +11,20 @@ interface IWadRayMath {
     function wadDiv(uint256, uint256) external view returns (uint256);
 
     function rayMul(uint256, uint256) external view returns (uint256);
+
+    function rayDiv(uint256, uint256) external view returns (uint256);
 }
 
 contract WadRayMathTest is Test {
     IWadRayMath public sut;
 
-    HuffConfig public huffDepl;
-
     /// @dev Setup the testing environment.
     function setUp() public {
-        uint256 WAD = 1e18;
+        address addr = HuffDeployer.deploy("WadRayMath");
 
-        huffDepl = HuffDeployer.config();
-
-        bytes memory args = (abi.encode(WAD));
-
-        sut = IWadRayMath(huffDepl.with_args(args).deploy("WadRayMath"));
+        /// System under test
+        sut = IWadRayMath(addr);
     }
-
-    // function setUp() public {
-    //     address addr = HuffDeployer.deploy("WadRayMath");
-
-    //     /// System under test
-    //     sut = IWadRayMath(addr);
-    // }
 
     function testDeployment() public {
         assert(address(sut) != address(0));
@@ -78,5 +66,19 @@ contract WadRayMathTest is Test {
         assertEq(sut.rayMul(2.5e27, 0.5e27), 1.25e27);
         assertEq(sut.rayMul(3e27, 1e27), 3e27);
         assertEq(sut.rayMul(369, 271), 0);
+    }
+
+    function testDivRayDown() public {
+        assertEq(sut.rayDiv(1.25e27, 0.5e27), 2.5e27);
+        assertEq(sut.rayDiv(3e27, 1e27), 3e27);
+        assertEq(sut.rayDiv(2, 100000000000000e27), 0);
+    }
+
+    function testDivRayDownEdgeCases() public {
+        assertEq(sut.rayDiv(0, 1e27), 0);
+    }
+
+    function testFailDivRayDownZeroDenominator() public {
+        sut.rayDiv(1e27, 0);
     }
 }
