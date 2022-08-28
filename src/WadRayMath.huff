@@ -145,7 +145,6 @@
     0x24 calldataload           // [num2, num1]
     dup1                        // [num2, num2, num1]
     iszero revert_tx jumpi      // [num2==0, num2, num1]    
-    
     0x02                        // [2, num2, num1]
     swap1                       // [num2, 2, num1]    
     div                         // [num2/2, num1]
@@ -181,58 +180,59 @@
 
 
 #define macro RAY_TO_WAD() = takes (0) returns (0) {
-    0x04 calldataload    
-    dup1 iszero return_zero jumpi
-    [WAD_RAY_RATIO]
-    dup1
-    0x02
-    swap1
-    div
-    dup3
-    
-    add
-    dup1
-    dup3
-     
-    lt return_result jumpi
+    0x04 calldataload           // [num]        
+    dup1                        // [num, num]        
+    iszero                      // [num==0, num]
+    return_zero jumpi           // [num]    
+    [WAD_RAY_RATIO]             // [1e9, num]
+    dup1                        // [1e9, 1e9, num]
+    0x02                        // [2, 1e9, 1e9, num]
+    swap1                       // [1e9, 2, 1e9, num]
+    div                         // [1e9/2, 1e9, num]
+    dup3                        // [num, 1e9/2, 1e9, num]
+    add                         // [num + 1e9/2,1e9,num]
+    dup1                        // [num+1e9/2, num+1e9/2, 1e9, num]    
+    dup3                        // [num, num+1e9/2, num+1e9/2, 1e9, num]
+    lt                          // [num < num+(1e9/2),num+1e9/2, 1e9, num]  
+    return_result jumpi         // [num+1e9/2, 1e9, num]
     revert
-    
+
     return_result:
-    pop
-    swap1
-    div
-    0x00 mstore
-    0x20 0x00 return
+    pop                         // [1e9, num]    
+    swap1                       // [num, 1e9]
+    div                         // [num / 1e9]
+    0x00 mstore                 // []
+    0x20 0x00 return            // []
 
     return_zero:
-        0x00
-        0x00 mstore
-        0x20 0x00 return
+        0x00                    // [0]
+        0x00 mstore             // []
+        0x20 0x00 return        // []
 }
 
 
 #define macro WAD_TO_RAY() = takes (0) returns (0) {
-    0x04 calldataload    
-    dup1 iszero return_zero jumpi
-
-    [WAD_RAY_RATIO]
-    dup1
-    dup3
-    mul
-    dup1
-    dup3
-    swap1
-    div
-    
-    dup4
-    eq iszero overflow jumpi
-    0x00 mstore
-    0x20 0x00 return
+    0x04 calldataload           // [num]               
+    dup1                        // [num, num]
+    iszero return_zero jumpi    // [num == 0, num]
+    [WAD_RAY_RATIO]             // [1e9, num]
+    dup1                        // [1e9, 1e9, num]
+    dup3                        // [num, 1e9, 1e9, num]        
+    mul                         // [num*1e9, 1e9, num]
+    dup1                        // [num*1e9, num*1e9, 1e9, num]        
+    dup3                        // [1e9, num*1e9, num*1e9, 1e9, num]
+    swap1                       // [num*1e9, 1e9, num*1e9, 1e9, num]
+    div                         // [num*1e9/1e9, num*1e9, 1e9, num]
+    dup4                        // [num, num*1e9/1e9, num*1e9, 1e9, num]
+    eq                          // [num==num*1e9/1e9, num*1e9, 1e9, num]
+    iszero overflow jumpi        
+    0x00 mstore                 // [1e9, num]
+    0x20 0x00 return            // [1e9, num]
      
-    return_zero:
-        0x00
-        0x00 mstore
-        0x20 0x00 return
+    return_zero:                
+        0x00                    // [0]
+        0x00 mstore             // []
+        0x20 0x00 return        // []    
         
     overflow:
         revert
