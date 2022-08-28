@@ -1,0 +1,3 @@
+WadRayMathTest:testDeployment() (gas: 2302)
+WadRayMathTest:testWadMul() (gas: 6824)
+WadRayMathTest:testWadMulEdgeCases() (gas: 6556)
