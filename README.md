@@ -77,8 +77,9 @@ test
 
 ## TODO
 
+- [x] Add support for `ln()` and `exp()`
+- [ ] Add fuzz tests
 - [ ] Handle reverts with reason string??
-- [ ] Add support for `ln()` and `exp()`
 
 ## Disclaimer
 
