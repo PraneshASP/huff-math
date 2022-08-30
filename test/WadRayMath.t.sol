@@ -17,6 +17,8 @@ interface IWadRayMath {
     function rayToWad(uint256) external view returns (uint256);
 
     function wadToRay(uint256) external view returns (uint256);
+
+    function wadExp(int256) external pure returns (int256);
 }
 
 contract WadRayMathTest is Test {
@@ -98,5 +100,57 @@ contract WadRayMathTest is Test {
         assertEq(sut.wadToRay(0), 0);
         assertEq(sut.wadToRay(1e18), 1e27);
         assertEq(sut.wadToRay(50000e18), 50000e27);
+    }
+
+    function testExpWad() public {
+        assertEq(sut.wadExp(-42139678854452767551), 0);
+
+        assertEq(sut.wadExp(-3e18), 49787068367863942);
+        assertEq(sut.wadExp(-2e18), 135335283236612691);
+        assertEq(sut.wadExp(-1e18), 367879441171442321);
+
+        assertEq(sut.wadExp(-0.5e18), 606530659712633423);
+        assertEq(sut.wadExp(-0.3e18), 740818220681717866);
+
+        assertEq(sut.wadExp(0), 1000000000000000000);
+
+        assertEq(sut.wadExp(0.3e18), 1349858807576003103);
+        assertEq(sut.wadExp(0.5e18), 1648721270700128146);
+
+        assertEq(sut.wadExp(1e18), 2718281828459045235);
+        assertEq(sut.wadExp(2e18), 7389056098930650227);
+        assertEq(
+            sut.wadExp(3e18),
+            20085536923187667741
+            // True value: 20085536923187667740.92
+        );
+
+        assertEq(
+            sut.wadExp(10e18),
+            220264657948067165169_80
+            // True value: 22026465794806716516957.90
+            // Relative error 9.987984547746668e-22
+        );
+
+        assertEq(
+            sut.wadExp(50e18),
+            5184705528587072464_148529318587763226117
+            // True value: 5184705528587072464_087453322933485384827.47
+            // Relative error: 1.1780031733243328e-20
+        );
+
+        assertEq(
+            sut.wadExp(100e18),
+            268811714181613544841_34666106240937146178367581647816351662017
+            // True value: 268811714181613544841_26255515800135873611118773741922415191608
+            // Relative error: 3.128803544297531e-22
+        );
+
+        assertEq(
+            sut.wadExp(135305999368893231588),
+            578960446186580976_50144101621524338577433870140581303254786265309376407432913
+            // True value: 578960446186580976_49816762928942336782129491980154662247847962410455084893091
+            // Relative error: 5.653904247484822e-21
+        );
     }
 }
