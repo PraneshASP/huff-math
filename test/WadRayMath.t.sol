@@ -62,11 +62,11 @@ contract WadRayMathTest is Test {
         sut.wadDiv(1e18, 0);
     }
 
-    // function testRayMulEdgeCases() public {
-    //     assertEq(sut.rayMul(0, 1e27), 0);
-    //     assertEq(sut.rayMul(1e27, 0), 0);
-    //     assertEq(sut.rayMul(0, 0), 0);
-    // }
+    function testRayMulEdgeCases() public {
+        assertEq(sut.rayMul(0, 1e27), 0);
+        assertEq(sut.rayMul(1e27, 0), 0);
+        assertEq(sut.rayMul(0, 0), 0);
+    }
 
     // function testRayMul() public {
     //     assertEq(sut.rayMul(2.5e27, 0.5e27), 1.25e27);

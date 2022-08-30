@@ -73,17 +73,9 @@
 }
 
 
-#define macro RAY_MUL() = takes (0) returns (0) {
+#define macro RAY_MUL() = takes (2) returns (1) {
 
-    0x04 calldataload           // [a]  
-    dup1                        // [a, a]       
-    iszero return_zero jumpi    // [a==0, a] 
-    
-    0x24 calldataload           // [b, a]
-    dup1                        // [b, b, a]
-    iszero return_zero jumpi    // [b==0, b, a]
-     
-
+     // Input Stack:             // [b, a]
     [HALF_RAY]                  // [HALF_RAY, b, a]
     [TYPE_UINT_MAX]             // [UINT_MAX, HALF_RAY, b, a]
     sub                         // [UINT_MAX-HALF_RAY, b, a]
@@ -93,11 +85,7 @@
     dup4                        // [a, (UINT_MAX-HALF_RAY / b),UINT_MAX-HALF_RAY,b, a]
     swap1                       // [(UINT_MAX-HALF_RAY / b),a,UINT_MAX-HALF_RAY,b, a]
     gt return_result jumpi      // [(UINT_MAX-HALF_RAY / b) > a,UINT_MAX-HALF_RAY,b, a]
-    
-    return_zero:
-        0x00                    // [0]
-        0x00 mstore             // []
-        0x20 0x00 return        // []
+    0x00 0x00 revert
     
     return_result:
         pop                     // [b, a]  
@@ -107,9 +95,7 @@
         [RAY]                   // [1e27, HALF_RAY + (b*a)]
         swap1                   // [HALF_RAY + (b*a),1e27]
         div                     // [HALF_RAY + (b*a) / 1e27]
-        0x00 mstore             // []
-        0x20 0x00 return        // []
-
+        // Return stack         // [HALF_RAY + (b*a) / 1e27]
 }
 
 #define macro RAY_DIV() = takes (0) returns (0) {
