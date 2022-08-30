@@ -48,19 +48,19 @@ contract WadRayMathTest is Test {
         assertEq(sut.wadMul(369, 271), 0);
     }
 
-    // function testDivWadDown() public {
-    //     assertEq(sut.wadDiv(1.25e18, 0.5e18), 2.5e18);
-    //     assertEq(sut.wadDiv(3e18, 1e18), 3e18);
-    //     assertEq(sut.wadDiv(2, 100000000000000e18), 0);
-    // }
+    function testDivWad() public {
+        assertEq(sut.wadDiv(1.25e18, 0.5e18), 2.5e18);
+        assertEq(sut.wadDiv(3e18, 1e18), 3e18);
+        assertEq(sut.wadDiv(2, 100000000000000e18), 0);
+    }
 
-    // function testDivWadDownEdgeCases() public {
-    //     assertEq(sut.wadDiv(0, 1e18), 0);
-    // }
+    function testDivWadEdgeCases() public {
+        assertEq(sut.wadDiv(0, 1e18), 0);
+    }
 
-    // function testFailDivWadDownZeroDenominator() public {
-    //     sut.wadDiv(1e18, 0);
-    // }
+    function testFailDivWadZeroDenominator() public {
+        sut.wadDiv(1e18, 0);
+    }
 
     // function testRayMulEdgeCases() public {
     //     assertEq(sut.rayMul(0, 1e27), 0);

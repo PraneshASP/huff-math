@@ -32,6 +32,22 @@
         0x20 0x00 return        // []
 }
 
+#define macro WAD_DIV_WRAPPER() = takes (0) returns (0) {
+    
+    0x04 calldataload           // [a]     
+    0x24 calldataload           // [b, a]
+    dup1                        // [b, b, a]
+    iszero revert_tx jumpi      // [b==0, b, a]    
+   
+    WAD_DIV()                   // [result]
+  
+    0x00 mstore                 // []
+    0x20 0x00 return            // [result]       
+
+    revert_tx:
+        0x00 0x00 revert        // []
+}
+
 /* Function Dispatcher */
 #define macro MAIN() = takes (0) returns (0) {
     // Identify which function is being called.
@@ -42,12 +58,25 @@
 
     // Jump table
     dup1 __FUNC_SIG(wadMul) eq  wad_mul jumpi
-
+    dup1 __FUNC_SIG(wadDiv) eq  wad_div jumpi
 
     wad_mul:
         WAD_MUL_WRAPPER()
 
-     
+    wad_div:
+        WAD_DIV_WRAPPER()  
+
+    // ray_mul:
+    //     RAY_MUL()  
+
+    // ray_div:
+    //     RAY_DIV() 
+
+    // ray_to_wad:
+    //     RAY_TO_WAD() 
+
+    // wad_to_ray:
+    //     WAD_TO_RAY() 
 
 }
 
