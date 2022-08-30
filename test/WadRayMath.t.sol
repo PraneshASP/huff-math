@@ -24,10 +24,12 @@ contract WadRayMathTest is Test {
 
     /// @dev Setup the testing environment.
     function setUp() public {
-        address addr = HuffDeployer.deploy("WadRayMath");
-
-        /// System under test
-        sut = IWadRayMath(addr);
+        string memory wrapper_code = vm.readFile(
+            "test/mocks/WadRayMathWrapper.huff"
+        );
+        sut = IWadRayMath(
+            HuffDeployer.deploy_with_code("WadRayMath", wrapper_code)
+        );
     }
 
     function testDeployment() public {
@@ -46,17 +48,17 @@ contract WadRayMathTest is Test {
         assertEq(sut.wadMul(369, 271), 0);
     }
 
-    function testDivWadDown() public {
+    function testDivWad() public {
         assertEq(sut.wadDiv(1.25e18, 0.5e18), 2.5e18);
         assertEq(sut.wadDiv(3e18, 1e18), 3e18);
         assertEq(sut.wadDiv(2, 100000000000000e18), 0);
     }
 
-    function testDivWadDownEdgeCases() public {
+    function testDivWadEdgeCases() public {
         assertEq(sut.wadDiv(0, 1e18), 0);
     }
 
-    function testFailDivWadDownZeroDenominator() public {
+    function testFailDivWadZeroDenominator() public {
         sut.wadDiv(1e18, 0);
     }
 

@@ -1,0 +1,162 @@
+
+/* Interface */
+#define function wadMul(uint256,uint256) nonpayable returns (uint256)
+#define function wadDiv(uint256,uint256) nonpayable returns (uint256)
+#define function rayMul(uint256,uint256) nonpayable returns (uint256)
+#define function rayDiv(uint256,uint256) nonpayable returns (uint256)
+#define function rayToWad(uint256) nonpayable returns (uint256)
+#define function wadToRay(uint256) nonpayable returns (uint256)
+
+ 
+
+/* Methods */
+#define macro WAD_MUL_WRAPPER() = takes (0) returns (0) {
+
+    /// Short circuit: Return zero if one of the inputs are zero
+    0x04 calldataload           // [a]  
+    dup1                        // [a, a]       
+    iszero return_zero jumpi    // [a==0, a] 
+    
+    0x24 calldataload           // [b, a]
+    dup1                        // [b, b, a]
+    iszero return_zero jumpi    // [b==0, b, a]
+  
+    WAD_MUL()                   // [result]
+  
+    0x00 mstore                 // []
+    0x20 0x00 return            // [result]       
+
+    return_zero:
+        0x00                    // [0]
+        0x00 mstore             // []
+        0x20 0x00 return        // []
+}
+
+#define macro WAD_DIV_WRAPPER() = takes (0) returns (0) {
+    
+    0x04 calldataload           // [a]     
+    0x24 calldataload           // [b, a]
+    dup1                        // [b, b, a]
+    iszero revert_tx jumpi      // [b==0, b, a]    
+   
+    WAD_DIV()                   // [result]
+  
+    0x00 mstore                 // []
+    0x20 0x00 return            // [result]       
+
+    revert_tx:
+        0x00 0x00 revert        // []
+}
+
+
+#define macro RAY_MUL_WRAPPER() = takes (0) returns (0) {
+
+    /// Short circuit: Return zero if one of the inputs are zero
+    0x04 calldataload           // [a]  
+    dup1                        // [a, a]       
+    iszero return_zero jumpi    // [a==0, a] 
+    
+    0x24 calldataload           // [b, a]
+    dup1                        // [b, b, a]
+    iszero return_zero jumpi    // [b==0, b, a]
+  
+    RAY_MUL()                   // [result]
+  
+    0x00 mstore                 // []
+    0x20 0x00 return            // [result]       
+
+    return_zero:
+        0x00                    // [0]
+        0x00 mstore             // []
+        0x20 0x00 return        // []
+}
+
+#define macro RAY_DIV_WRAPPER() = takes (0) returns (0) {
+    
+    0x04 calldataload           // [a]     
+    0x24 calldataload           // [b, a]
+    dup1                        // [b, b, a]
+    iszero revert_tx jumpi      // [b==0, b, a]    
+   
+    RAY_DIV()                   // [result]
+  
+    0x00 mstore                 // []
+    0x20 0x00 return            // []       
+
+    revert_tx:
+        0x00 0x00 revert        // []
+}
+
+#define macro RAY_TO_WAD_WRAPPER() = takes (0) returns (0) {
+    0x04 calldataload           // [num]        
+    dup1                        // [num, num]        
+    iszero                      // [num==0, num]
+    return_zero jumpi           // [num]    
+
+    RAY_TO_WAD()                // [result]
+    0x00 mstore                 // []
+    0x20 0x00 return            // []       
+    
+    return_zero:
+        0x00                    // [0]
+        0x00 mstore             // []
+        0x20 0x00 return        // []
+   
+}
+
+#define macro WAD_TO_RAY_WRAPPER() = takes (0) returns (0) {
+
+    0x04 calldataload           // [num]               
+    dup1                        // [num, num]
+    iszero return_zero jumpi    // [num == 0, num]
+
+    WAD_TO_RAY()                // [result]
+    0x00 mstore                 // []
+    0x20 0x00 return            // []       
+    
+    return_zero:
+        0x00                    // [0]
+        0x00 mstore             // []
+        0x20 0x00 return        // []
+}
+
+
+
+
+/* Function Dispatcher */
+#define macro MAIN() = takes (0) returns (0) {
+    // Identify which function is being called.
+    0x00 calldataload 
+    
+    // Extract the function signature
+    0xe0 shr
+
+    // Jump table
+    dup1 __FUNC_SIG(wadMul) eq  wad_mul jumpi
+    dup1 __FUNC_SIG(wadDiv) eq  wad_div jumpi
+    dup1 __FUNC_SIG(rayMul) eq  ray_mul jumpi
+    dup1 __FUNC_SIG(rayDiv) eq  ray_div jumpi
+    dup1 __FUNC_SIG(rayToWad) eq  ray_to_wad jumpi
+    dup1 __FUNC_SIG(wadToRay) eq  wad_to_ray jumpi
+
+    wad_mul:
+        WAD_MUL_WRAPPER()
+
+    wad_div:
+        WAD_DIV_WRAPPER()  
+
+    ray_mul:
+        RAY_MUL_WRAPPER()  
+
+    ray_div:
+        RAY_DIV_WRAPPER() 
+
+    ray_to_wad:
+        RAY_TO_WAD_WRAPPER() 
+
+    wad_to_ray:
+        WAD_TO_RAY_WRAPPER() 
+
+}
+
+

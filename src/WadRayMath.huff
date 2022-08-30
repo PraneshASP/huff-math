@@ -1,13 +1,4 @@
 
-/* Interface */
-#define function wadMul(uint256,uint256) nonpayable returns (uint256)
-#define function wadDiv(uint256,uint256) nonpayable returns (uint256)
-#define function rayMul(uint256,uint256) nonpayable returns (uint256)
-#define function rayDiv(uint256,uint256) nonpayable returns (uint256)
-#define function rayToWad(uint256) nonpayable returns (uint256)
-#define function wadToRay(uint256) nonpayable returns (uint256)
-
- 
 
 /* Constants*/
 #define constant WAD = 0xde0b6b3a7640000
@@ -20,18 +11,8 @@
  
 
 /* Methods */
-#define macro WAD_MUL() = takes (0) returns (0) {
-
-    /// Short circuit: Return zero if one of the inputs are zero
-    0x04 calldataload           // [a]  
-    dup1                        // [a, a]       
-    iszero return_zero jumpi    // [a==0, a] 
-    
-    0x24 calldataload           // [b, a]
-    dup1                        // [b, b, a]
-    iszero return_zero jumpi    // [b==0, b, a]
-     
-
+#define macro WAD_MUL() = takes (2) returns (1) {
+    // Input Stack:             // [b, a]
     [HALF_WAD]                  // [HALF_WAD, b, a]
     [TYPE_UINT_MAX]             // [UINT_MAX, HALF_WAD, b, a]
     sub                         // [UINT_MAX-HALF_WAD, b, a]
@@ -41,11 +22,8 @@
     dup4                        // [a, (UINT_MAX-HALF_WAD / b),UINT_MAX-HALF_WAD,b, a]
     swap1                       // [(UINT_MAX-HALF_WAD / b),a,UINT_MAX-HALF_WAD,b, a]
     gt return_result jumpi      // [(UINT_MAX-HALF_WAD / b) > a,UINT_MAX-HALF_WAD,b, a]
-    
-    return_zero:
-        0x00                    // [0]
-        0x00 mstore             // []
-        0x20 0x00 return        // []
+    0x00 0x00 revert
+   
     
     return_result:
         pop                     // [b, a]  
@@ -55,18 +33,12 @@
         [WAD]                   // [1e18, HALF_WAD + (b*a)]
         swap1                   // [HALF_WAD + (b*a),1e18]
         div                     // [HALF_WAD + (b*a) / 1e18]
-        0x00 mstore             // []
-        0x20 0x00 return        // []
-
+        // Return Stack         // [HALF_WAD + (b*a) / 1e18]
 }
 
 
-#define macro WAD_DIV() = takes (0) returns (0) {
-    0x04 calldataload           // [a]     
-    0x24 calldataload           // [b, a]
-    dup1                        // [b, b, a]
-    iszero revert_tx jumpi      // [b==0, b, a]    
-    
+#define macro WAD_DIV() = takes (2) returns (1) {
+    // Input Stack:             // [b, a]
     0x02                        // [2, b, a]
     swap1                       // [b, 2, a]    
     div                         // [b/2, a]
@@ -80,9 +52,8 @@
     dup3                        // [a, (UINT_MAX - (b / 2)) / 1e18, UINT_MAX - b / 2, a]
     swap1                       // [(UINT_MAX - (b / 2)) / 1e18, a, UINT_MAX - b / 2, a]
     gt return_result jumpi      // [(UINT_MAX - (b / 2)) / 1e18 > a, UINT_MAX - b / 2, a] 
-    
-    revert_tx:
-        revert
+   // 0x00 0x00 revert
+
 
      return_result:
         pop                     // [a] 
@@ -96,22 +67,13 @@
         mul                     // [b, b/2 + a*1e8, a]
         swap1                   // [b/2 + a *1e18, b, a ]
         div                     // [(b/2 + a *1e18) / b, a ]    
-        0x00 mstore             // [a]
-        0x20 0x00 return        // [a]
+        // Return Stack         // [(b/2 + a *1e18) / b, a ]   
+
 }
 
 
-#define macro RAY_MUL() = takes (0) returns (0) {
-
-    0x04 calldataload           // [a]  
-    dup1                        // [a, a]       
-    iszero return_zero jumpi    // [a==0, a] 
-    
-    0x24 calldataload           // [b, a]
-    dup1                        // [b, b, a]
-    iszero return_zero jumpi    // [b==0, b, a]
-     
-
+#define macro RAY_MUL() = takes (2) returns (1) {
+     // Input Stack:             // [b, a]
     [HALF_RAY]                  // [HALF_RAY, b, a]
     [TYPE_UINT_MAX]             // [UINT_MAX, HALF_RAY, b, a]
     sub                         // [UINT_MAX-HALF_RAY, b, a]
@@ -121,11 +83,7 @@
     dup4                        // [a, (UINT_MAX-HALF_RAY / b),UINT_MAX-HALF_RAY,b, a]
     swap1                       // [(UINT_MAX-HALF_RAY / b),a,UINT_MAX-HALF_RAY,b, a]
     gt return_result jumpi      // [(UINT_MAX-HALF_RAY / b) > a,UINT_MAX-HALF_RAY,b, a]
-    
-    return_zero:
-        0x00                    // [0]
-        0x00 mstore             // []
-        0x20 0x00 return        // []
+    0x00 0x00 revert
     
     return_result:
         pop                     // [b, a]  
@@ -135,16 +93,11 @@
         [RAY]                   // [1e27, HALF_RAY + (b*a)]
         swap1                   // [HALF_RAY + (b*a),1e27]
         div                     // [HALF_RAY + (b*a) / 1e27]
-        0x00 mstore             // []
-        0x20 0x00 return        // []
-
+        // Return stack         // [HALF_RAY + (b*a) / 1e27]
 }
 
-#define macro RAY_DIV() = takes (0) returns (0) {
-    0x04 calldataload           // [a]     
-    0x24 calldataload           // [b, a]
-    dup1                        // [b, b, a]
-    iszero revert_tx jumpi      // [b==0, b, a]    
+#define macro RAY_DIV() = takes (2) returns (1) {
+    // Input Stack:             // [b, a]
     0x02                        // [2, b, a]
     swap1                       // [b, 2, a]    
     div                         // [b/2, a]
@@ -158,9 +111,7 @@
     dup3                        // [a, (UINT_MAX - (b / 2)) / 1e27, UINT_MAX - b / 2, a]
     swap1                       // [(UINT_MAX - (b / 2)) / 1e27, a, UINT_MAX - b / 2, a]
     gt return_result jumpi      // [(UINT_MAX - (b / 2)) / 1e27 > a, UINT_MAX - b / 2, a] 
-    
-    revert_tx:
-        revert
+    0x00 0x00 revert
 
      return_result:
         pop                     // [a] 
@@ -173,17 +124,13 @@
         0x02                    // [2,b/2, b/2 + a*1e27, a]
         mul                     // [b, b/2 + a*1e8, a]
         swap1                   // [b/2 + a *1e27, b, a ]
-        div                     // [(b/2 + a *1e27) / b, a ]    
-        0x00 mstore             // [a]
-        0x20 0x00 return        // [a]
+        div                     // [(b/2 + a *1e27) / b, a]    
+        // Return stack         // [(b/2 + a *1e27) / b, a]   
 }
 
 
-#define macro RAY_TO_WAD() = takes (0) returns (0) {
-    0x04 calldataload           // [num]        
-    dup1                        // [num, num]        
-    iszero                      // [num==0, num]
-    return_zero jumpi           // [num]    
+#define macro RAY_TO_WAD() = takes (1) returns (1) {
+    //Input stack               // [num]
     [WAD_RAY_RATIO]             // [1e9, num]
     dup1                        // [1e9, 1e9, num]
     0x02                        // [2, 1e9, 1e9, num]
@@ -195,26 +142,18 @@
     dup3                        // [num, num+1e9/2, num+1e9/2, 1e9, num]
     lt                          // [num < num+(1e9/2),num+1e9/2, 1e9, num]  
     return_result jumpi         // [num+1e9/2, 1e9, num]
-    revert
+    0x00 0x00 revert
 
     return_result:
-    pop                         // [1e9, num]    
-    swap1                       // [num, 1e9]
-    div                         // [num / 1e9]
-    0x00 mstore                 // []
-    0x20 0x00 return            // []
-
-    return_zero:
-        0x00                    // [0]
-        0x00 mstore             // []
-        0x20 0x00 return        // []
+        pop                         // [1e9, num]    
+        swap1                       // [num, 1e9]
+        div                         // [num / 1e9]
+        //Return stack              // [num / 1e9]
 }
 
 
-#define macro WAD_TO_RAY() = takes (0) returns (0) {
-    0x04 calldataload           // [num]               
-    dup1                        // [num, num]
-    iszero return_zero jumpi    // [num == 0, num]
+#define macro WAD_TO_RAY() = takes (1) returns (1) {
+    // Input stack              // [num]
     [WAD_RAY_RATIO]             // [1e9, num]
     dup1                        // [1e9, 1e9, num]
     dup3                        // [num, 1e9, 1e9, num]        
@@ -226,54 +165,51 @@
     dup4                        // [num, num*1e9/1e9, num*1e9, 1e9, num]
     eq                          // [num==num*1e9/1e9, num*1e9, 1e9, num]
     iszero overflow jumpi        
-    0x00 mstore                 // [1e9, num]
-    0x20 0x00 return            // [1e9, num]
-     
-    return_zero:                
-        0x00                    // [0]
-        0x00 mstore             // []
-        0x20 0x00 return        // []    
-        
+    finish jump
+    
     overflow:
-        revert
+        0x00 0x00 revert
+
+    finish:
+    // Return stack             // [num*1e9, 1e9, num]]
 }
  
-/* Function Dispatcher */
-#define macro MAIN() = takes (0) returns (0) {
-    // Identify which function is being called.
-    0x00 calldataload 
+// /* Function Dispatcher */
+// #define macro MAIN() = takes (0) returns (0) {
+//     // Identify which function is being called.
+//     0x00 calldataload 
     
-    // Extract the function signature
-    0xe0 shr
+//     // Extract the function signature
+//     0xe0 shr
 
-    // Jump table
-    dup1 __FUNC_SIG(wadMul) eq  wad_mul jumpi
-    dup1 __FUNC_SIG(wadDiv) eq  wad_div jumpi
-    dup1 __FUNC_SIG(rayMul) eq  ray_mul jumpi
-    dup1 __FUNC_SIG(rayDiv) eq  ray_div jumpi
-    dup1 __FUNC_SIG(rayToWad) eq  ray_to_wad jumpi
-    dup1 __FUNC_SIG(wadToRay) eq  wad_to_ray jumpi
+//     // Jump table
+//     dup1 __FUNC_SIG(wadMul) eq  wad_mul jumpi
+//     dup1 __FUNC_SIG(wadDiv) eq  wad_div jumpi
+//     dup1 __FUNC_SIG(rayMul) eq  ray_mul jumpi
+//     dup1 __FUNC_SIG(rayDiv) eq  ray_div jumpi
+//     dup1 __FUNC_SIG(rayToWad) eq  ray_to_wad jumpi
+//     dup1 __FUNC_SIG(wadToRay) eq  wad_to_ray jumpi
 
 
-    wad_mul:
-        WAD_MUL()
+//     wad_mul:
+//         WAD_MUL()
 
-    wad_div:
-        WAD_DIV()  
+//     wad_div:
+//         WAD_DIV()  
 
-    ray_mul:
-        RAY_MUL()  
+//     ray_mul:
+//         RAY_MUL()  
 
-    ray_div:
-        RAY_DIV() 
+//     ray_div:
+//         RAY_DIV() 
 
-    ray_to_wad:
-        RAY_TO_WAD() 
+//     ray_to_wad:
+//         RAY_TO_WAD() 
 
-    wad_to_ray:
-        WAD_TO_RAY() 
+//     wad_to_ray:
+//         WAD_TO_RAY() 
 
-}
+// }
 
 
 
