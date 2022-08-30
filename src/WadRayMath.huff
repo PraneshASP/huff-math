@@ -172,5 +172,137 @@
     // Return stack             // [num*1e9, 1e9, num]]
 }
  
- 
- 
+ // Slightly modified from: https://github.com/pentagonxyz/huffmate/blob/main/src/math/FixedPointMath.huff
+ #define macro WAD_EXP() = takes(1) returns (1) {
+    // Input stack:             // [x]
+    // When the result is < 0.5 we return zero. This happens when
+    // x <= floor(log(0.5e18) * 1e18) ~ -42e18
+    0xfffffffffffffffffffffffffffffffffffffffffffffffdb731c958f34d94c1
+    dup2                        // [x, 0xfff..., x]
+    sgt iszero                  // [x <= 0xfff..., x]
+    ret_zero jumpi              // [x]
+
+    // When the result is > (2**255 - 1) / 1e18 we can not represent it as an
+    // int. This happens when x >= floor(log((2**255 - 1) / 1e18) * 1e18) ~ 135.
+    0x0755bf798b4a1bf1e5        // [0x0755bf798b4a1bf1e5, x]
+    dup2                        // [x, 0x0755bf798b4a1bf1e5, x]
+    slt iszero                  // [x >= 0x0755bf798b4a1bf1e5, x]
+    fail jumpi                  // [x]
+
+    // x is now in the range (-42, 136) * 1e18. Convert to (-42, 136) * 2**96
+    // for more intermediate precision and a binary basis. This base conversion
+    // is a multiplication by 1e18 / 2**96 = 5**18 / 2**78.
+    0x03782dace9d9              // [0x05 ** 0x12, x]
+    swap1                       // [x, 0x05 ** 0x12]
+    0x4e shl                    // [x << 0x4e, 0x05 ** 0x12]
+    sdiv                    /   / [x << 0x4e / 0x05 ** 0x12]
+
+    // Reduce range of x to (-1/2 ln 2, 1/2 ln 2) * 2**96 by factoring out powers
+    // of two such that exp(x) = exp(x') * 2**k, where k is an integer.
+    // Solving this gives k = round(x / log(2)) and x' = x - k * log(2).
+    0xb17217f7d1cf79abc9e3b398
+    dup2                        // [x, 0xb17217f7d1cf79abc9e3b398, x]
+    0x60 shl                    // [x << 96, 0xb17217f7d1cf79abc9e3b398, x]
+    sdiv                        // [x << 96 / 0xb17217f7d1cf79abc9e3b398, x]
+    0x7ffffff20f9306d2eea00000  // [2**95, x << 96 / 0xb17217f7d1cf79abc9e3b398, x]
+    add                         // [2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398, x]
+    0x60 sar                    // [(2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398) >> 96, x]
+
+    dup1                        // [(2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398) >> 96, (2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398) >> 96, x]
+    0xb17217f7d1cf79abc9e3b398
+    mul                         // [((2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398) >> 96) * 0xb17217f7d1cf79abc9e3b398, (2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398) >> 96, x]
+    dup3                        // [x, ((2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398) >> 96) * 0xb17217f7d1cf79abc9e3b398, (2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398) >> 96, x]
+    sub                         // [x (new), (2**95 + x << 96 / 0xb17217f7d1cf79abc9e3b398) >> 96, x]
+    swap2 pop                   // [k, x]
+
+    // k is in the range [-61, 195].
+
+    // Evaluate using a (6, 7)-term rational approximation.
+    // p is made monic, we'll multiply by a scale factor later.
+    0x10fe68e7fd37d0007b713f7650
+    dup3                        // [x, 0x10fe68e7fd37d0007b713f7650, k, x]
+    add                         // [y, k, x]
+
+    0x02d16720577bd19bf614176fe9ea
+    dup2 dup5 mul               // [x * y, 0x02d16720577bd19bf614176fe9ea, y, k, x]
+    0x60 sar                    // [(x * y) >> 0x60, 0x02d16720577bd19bf614176fe9ea, y, k, x]
+    add                         // [((x * y) >> 0x60) + 0x02d16720577bd19bf614176fe9ea, y, k, x]
+    swap1 pop                   // [y, k, x]
+
+    0x04a4fd9f2a8b96949216d2255a6c
+    dup4 dup3 add               // [x + y, 0x04a4fd9f2a8b96949216d2255a6c, y, k, x]
+    sub                         // [x + y - 0x04a4fd9f2a8b96949216d2255a6c, y, k, x]
+    
+    dup2                        // [y, x + y - 0x04a4fd9f2a8b96949216d2255a6c, y, k, x]
+    mul                         // [y * (x + y - 0x04a4fd9f2a8b96949216d2255a6c), y, k, x]
+    0x60 sar                    // [(y * (x + y - 0x04a4fd9f2a8b96949216d2255a6c)) >> 0x60, y, k, x]
+    0x0587f503bb6ea29d25fcb740196450
+    add                         // [p, y, k, x]
+
+    dup4                        // [x, p, y, k, x]
+    mul                         // [x * p, y, k, x]
+    0xd835ebba824c98fb31b83b2ca45c
+    0x60 shl                    // [0xd835ebba824c98fb31b83b2ca45c << 0x60, x * p, y, k, x]
+    add                         // [p, y, k, x]
+
+    // We leave p in 2**192 basis so we don't need to scale it back up for the division.
+
+    0x240c330e9fb2d9cbaf0fd5aafc
+    dup5 sub                    // [q, p, y, k, x]
+
+    dup5 mul                    // [x * q, p, y, k, x]
+    0x60 sar                    // [(x * q) >> 0x60, p, y, k, x]
+    0x0277594991cfc85f6e2461837cd9
+    add                         // [q, p, y, k, x]
+
+    dup5 mul                    // [x * q, p, y, k, x]
+    0x60 sar                    // [(x * q) >> 0x60, p, y, k, x]
+    0x1a521255e34f6a5061b25ef1c9c4 swap1
+    sub                         // [q, p, y, k, x]
+
+    dup5 mul                    // [x * q, p, y, k, x]
+    0x60 sar                    // [(x * q) >> 0x60, p, y, k, x]
+    0xb1bbb201f443cf962f1a1d3db4a5
+    add                         // [q, p, y, k, x]
+
+    dup5 mul                    // [x * q, p, y, k, x]
+    0x60 sar                    // [(x * q) >> 0x60, p, y, k, x]
+    0x02c72388d9f74f51a9331fed693f15 swap1
+    sub                         // [q, p, y, k, x]
+
+    dup5 mul                    // [x * q, p, y, k, x]
+    0x60 sar                    // [(x * q) >> 0x60, p, y, k, x]
+    0x05180bb14799ab47a8a8cb2a527d57
+    add                         // [q, p, y, k, x]
+
+    // The q polynomial won't have zeros in the domain as all its roots are complex.
+    // No scaling is necessary because p is already 2**96 too large.
+    swap1 sdiv                  // [p / q (r), y, k, x]
+
+    // r should be in the range (0.09, 0.25) * 2**96.
+
+    // We now need to multiply r by:
+    // * the scale factor s = ~6.031367120.
+    // * the 2**k factor from the range reduction.
+    // * the 1e18 / 2**96 factor for base conversion.
+    // We do this all at once, with an intermediate result in 2**213
+    // basis, so the final right shift is always by a positive amount.
+    
+    0x029d9dc38563c32e5c2f6dc192ee70ef65f9978af3
+    mul                         // [0x029d9... * r, y, k, x]
+    dup3                        // [k, 0x029d9... * r, y, k, x]
+    0xc3 sub                    // [0xc3 - k, 0x029d9... * r, y, k, x]
+    shr                         // [(0x029d9... * r) >> 0xc3 - k, y, k, x]
+
+    finish jump
+
+    ret_zero:
+        0x00 dup1 mstore
+        0x20 0x00 return
+
+     fail:
+        0x00 0x00 revert
+
+    finish:
+    // Return stack:            // [result, ...]
+ }
