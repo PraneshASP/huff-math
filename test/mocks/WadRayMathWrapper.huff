@@ -156,7 +156,6 @@
 
     wad_to_ray:
         WAD_TO_RAY_WRAPPER() 
-
 }
 
 
