@@ -6,6 +6,8 @@
 #define function rayDiv(uint256,uint256) nonpayable returns (uint256)
 #define function rayToWad(uint256) nonpayable returns (uint256)
 #define function wadToRay(uint256) nonpayable returns (uint256)
+#define function wadExp(int256) nonpayable returns (int256)
+#define function wadLn(int256) nonpayable returns (int256)
 
  
 
@@ -120,6 +122,19 @@
         0x20 0x00 return        // []
 }
 
+#define macro WAD_EXP_WRAPPER() = takes (0) returns (0) {
+    0x04 calldataload          // [x]
+    WAD_EXP()                   // [result]
+    0x00 mstore                 // []
+    0x20 0x00 return            // []        
+}
+
+#define macro WAD_LN_WRAPPER() = takes (0) returns (0) {
+    0x04 calldataload          // [x]
+    WAD_LN()                   // [result]
+    0x00 mstore                 // []
+    0x20 0x00 return            // []        
+}
 
 
 
@@ -138,6 +153,8 @@
     dup1 __FUNC_SIG(rayDiv) eq  ray_div jumpi
     dup1 __FUNC_SIG(rayToWad) eq  ray_to_wad jumpi
     dup1 __FUNC_SIG(wadToRay) eq  wad_to_ray jumpi
+    dup1 __FUNC_SIG(wadExp) eq  wad_exp jumpi
+    dup1 __FUNC_SIG(wadLn) eq  wad_ln jumpi
 
     wad_mul:
         WAD_MUL_WRAPPER()
@@ -156,6 +173,12 @@
 
     wad_to_ray:
         WAD_TO_RAY_WRAPPER() 
+
+    wad_exp:
+        WAD_EXP_WRAPPER()  
+
+     wad_ln:
+        WAD_LN_WRAPPER()  
 }
 
 
