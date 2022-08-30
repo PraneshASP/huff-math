@@ -52,8 +52,6 @@
     dup3                        // [a, (UINT_MAX - (b / 2)) / 1e18, UINT_MAX - b / 2, a]
     swap1                       // [(UINT_MAX - (b / 2)) / 1e18, a, UINT_MAX - b / 2, a]
     gt return_result jumpi      // [(UINT_MAX - (b / 2)) / 1e18 > a, UINT_MAX - b / 2, a] 
-   // 0x00 0x00 revert
-
 
      return_result:
         pop                     // [a] 
@@ -174,43 +172,5 @@
     // Return stack             // [num*1e9, 1e9, num]]
 }
  
-// /* Function Dispatcher */
-// #define macro MAIN() = takes (0) returns (0) {
-//     // Identify which function is being called.
-//     0x00 calldataload 
-    
-//     // Extract the function signature
-//     0xe0 shr
-
-//     // Jump table
-//     dup1 __FUNC_SIG(wadMul) eq  wad_mul jumpi
-//     dup1 __FUNC_SIG(wadDiv) eq  wad_div jumpi
-//     dup1 __FUNC_SIG(rayMul) eq  ray_mul jumpi
-//     dup1 __FUNC_SIG(rayDiv) eq  ray_div jumpi
-//     dup1 __FUNC_SIG(rayToWad) eq  ray_to_wad jumpi
-//     dup1 __FUNC_SIG(wadToRay) eq  wad_to_ray jumpi
-
-
-//     wad_mul:
-//         WAD_MUL()
-
-//     wad_div:
-//         WAD_DIV()  
-
-//     ray_mul:
-//         RAY_MUL()  
-
-//     ray_div:
-//         RAY_DIV() 
-
-//     ray_to_wad:
-//         RAY_TO_WAD() 
-
-//     wad_to_ray:
-//         WAD_TO_RAY() 
-
-// }
-
-
-
+ 
  
