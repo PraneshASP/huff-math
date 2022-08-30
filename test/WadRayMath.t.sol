@@ -19,6 +19,8 @@ interface IWadRayMath {
     function wadToRay(uint256) external view returns (uint256);
 
     function wadExp(int256) external pure returns (int256);
+
+    function wadLn(int256) external pure returns (int256);
 }
 
 contract WadRayMathTest is Test {
@@ -152,5 +154,40 @@ contract WadRayMathTest is Test {
             // True value: 578960446186580976_49816762928942336782129491980154662247847962410455084893091
             // Relative error: 5.653904247484822e-21
         );
+    }
+
+    function testLnWad() public {
+        assertEq(sut.wadLn(1e18), 0);
+
+        // Actual: 999999999999999999.8674576…
+        assertEq(sut.wadLn(2718281828459045235), 999999999999999999);
+
+        // Actual: 2461607324344817917.963296…
+        assertEq(sut.wadLn(11723640096265400935), 2461607324344817918);
+    }
+
+    function testLnWadSmall() public {
+        // Actual: -41446531673892822312.3238461…
+        assertEq(sut.wadLn(1), -41446531673892822313);
+
+        // Actual: -37708862055609454006.40601608…
+        assertEq(sut.wadLn(42), -37708862055609454007);
+
+        // Actual: -32236191301916639576.251880365581…
+        assertEq(sut.wadLn(1e4), -32236191301916639577);
+
+        // Actual: -20723265836946411156.161923092…
+        assertEq(sut.wadLn(1e9), -20723265836946411157);
+    }
+
+    function testLnWadBig() public {
+        // Actual: 135305999368893231589.070344787…
+        assertEq(sut.wadLn(2**255 - 1), 135305999368893231589);
+
+        // Actual: 76388489021297880288.605614463571…
+        assertEq(sut.wadLn(2**170), 76388489021297880288);
+
+        // Actual: 47276307437780177293.081865…
+        assertEq(sut.wadLn(2**128), 47276307437780177293);
     }
 }
