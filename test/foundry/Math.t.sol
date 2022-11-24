@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
-import {IMath} from "../src/interfaces/IMath.sol";
+import {IMath} from "../../src/interfaces/IMath.sol";
 
 contract MathTest is Test {
     IMath public math;

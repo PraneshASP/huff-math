@@ -1,4 +1,4 @@
-#include '../../src/WadRayMath.huff'
+#include '../../../src/WadRayMath.huff'
 /* Interface */
 #define function wadMul(uint256,uint256) nonpayable returns (uint256)
 #define function wadDiv(uint256,uint256) nonpayable returns (uint256)
