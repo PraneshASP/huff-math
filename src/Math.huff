@@ -1,98 +1,45 @@
+// Note: These are very basic impementation intended for learning. They don't check for overflows or underflows
+// This was my first huff project :D
 
-/* Interface */
-#define function addNumbers(uint256,uint256) nonpayable returns (uint256)
-#define function subNumbers(uint256,uint256) nonpayable returns (uint256)
-#define function multiplyNumbers(uint256,uint256) nonpayable returns (uint256)
-#define function divideNumbers(uint256,uint256) nonpayable returns (uint256)
-#define function abs(uint256,uint256) nonpayable returns (uint256)
-
-
-/* Storage Slot */
-#define constant ANS = FREE_STORAGE_POINTER()
- 
 /* Methods */
 #define macro ADD_NUMBERS() = takes (2) returns (1) {
-    0x04 calldataload    // [num1] STACK=> { num1 }
-    0x24 calldataload    // [num2] STACK=> { num2, num1 }
-    add                  // [add num1 & num2] STACK=> { SUM }         
-    [ANS] mstore         // Store sum in memory.  
-    0x20 [ANS] return    // Return the sum
+    // Input stack:      // [num2, num1]
+    add                  // [num2 + num1]         
 }
 
 #define macro SUB_NUMBERS() = takes (2) returns (1) {
-    0x04 calldataload   // [num1] STACK=> { num1 }
-    0x24 calldataload   // [num2] STACK=> { num2, num1 }
-    swap1               // STACK=> { num1, num2 }
-    sub                 // [subtract num1 & num2] STACK=> { DIFF }                
-    [ANS] mstore        // Store diff in memory.                         
-    0x20 [ANS] return   // Return difference
+    // Input stack:      // [num2, num1]
+    swap1                // [num1, num2]
+    sub                  // [num1 - num2]         
 }
 
+
 #define macro MULTIPLY_NUMBERS() = takes (2) returns (1) {
-    0x04 calldataload   // [num1] STACK=> { num1 }
-    0x24 calldataload   // [num2] STACK=> { num2, num1 }
-    mul                 // [multiply num1 & num2] STACK=> { PRODUCT }                
-    [ANS] mstore        // Store product in memory.                         
-    0x20 [ANS] return   // Return product
+    // Input stack:      // [num2, num1]
+    mul                  // [num2 * num1]         
 }
 
 #define macro DIVIDE_NUMBERS() = takes (2) returns (1) {
-    0x04 calldataload   // [num1] STACK=> { num1 }
-    0x24 calldataload   // [num2] STACK=> { num2, num1 }
-    swap1               // STACK=> { num1, num2 }
-    div                 // [divide num1 & num2] STACK=> { QUOTIENT }                
-    [ANS] mstore        // Store quotient in memory.                         
-    0x20 [ANS] return   // Return quotient
+    // Input stack:      // [num2, num1]
+    swap1                // [num1, num2]
+    div                  // [num1 / num2]         
 }
 
 
 #define macro ABS() = takes (2) returns (1) {
-    0x04 calldataload    
-    0x24 calldataload    
+    // Input stack:     // [num2, num1]
     dup1
     dup3
     lt 
     iszero swapAndSubtract jumpi
     sub                      
-    [ANS] mstore                           
-    0x20 [ANS] return   
+    complete jump  
 
     swapAndSubtract:
         swap1
         sub
-        [ANS] mstore
-        0x20 [ANS] return  
-}
-
-#define macro MAIN() = takes (0) returns (0) {
-    // Identify which function is being called.
-    0x00 calldataload 
     
-    // Extract the function singature
-    0xe0 shr
-
-    // Jump table
-    dup1 0xef9fc50b eq  addNumbers      jumpi
-    dup1 0x9c0a2b51 eq  subNumbers      jumpi
-    dup1 0xd3f3cd7b eq  multiplyNumbers jumpi
-    dup1 0x8fce12ed eq  divideNumbers   jumpi
-    dup1 0xe093a157 eq  abs             jumpi
-
-
-    addNumbers:
-        ADD_NUMBERS()
-
-    subNumbers:
-        SUB_NUMBERS()
-   
-    multiplyNumbers:
-        MULTIPLY_NUMBERS()
-
-     divideNumbers:
-        DIVIDE_NUMBERS()
-
-    abs:
-        ABS()
-
+    complete:
 }
 
+ 

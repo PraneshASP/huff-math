@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
-import {IWadRayMath} from "../src/interfaces/IWadRayMath.sol";
+import {IWadRayMath} from "../../src/interfaces/IWadRayMath.sol";
 
 contract WadRayMathTest is Test {
     IWadRayMath public sut;
@@ -11,7 +11,7 @@ contract WadRayMathTest is Test {
     /// @dev Setup the testing environment.
     function setUp() public {
         sut = IWadRayMath(
-            HuffDeployer.deploy("../test/mocks/WadRayMathWrapper")
+            HuffDeployer.deploy("../test/foundry/wrappers/WadRayMathWrapper")
         );
     }
 
