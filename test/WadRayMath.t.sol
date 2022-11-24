@@ -28,11 +28,8 @@ contract WadRayMathTest is Test {
 
     /// @dev Setup the testing environment.
     function setUp() public {
-        string memory wrapper_code = vm.readFile(
-            "test/mocks/WadRayMathWrapper.huff"
-        );
         sut = IWadRayMath(
-            HuffDeployer.deploy_with_code("WadRayMath", wrapper_code)
+            HuffDeployer.deploy("../test/mocks/WadRayMathWrapper")
         );
     }
 
