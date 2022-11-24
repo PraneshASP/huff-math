@@ -3,19 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
-
-/// @notice Interface for the Math contract
-interface IMath {
-    function addNumbers(uint256, uint256) external view returns (uint256);
-
-    function subNumbers(uint256, uint256) external view returns (uint256);
-
-    function multiplyNumbers(uint256, uint256) external view returns (uint256);
-
-    function divideNumbers(uint256, uint256) external view returns (uint256);
-
-    function abs(uint256, uint256) external view returns (uint256);
-}
+import {IMath} from "../src/interfaces/IMath.sol";
 
 contract MathTest is Test {
     IMath public math;

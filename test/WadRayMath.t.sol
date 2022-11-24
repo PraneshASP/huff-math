@@ -3,25 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
-
-/// @notice Interface for the WadRayMath contract
-interface IWadRayMath {
-    function wadMul(uint256, uint256) external view returns (uint256);
-
-    function wadDiv(uint256, uint256) external view returns (uint256);
-
-    function rayMul(uint256, uint256) external view returns (uint256);
-
-    function rayDiv(uint256, uint256) external view returns (uint256);
-
-    function rayToWad(uint256) external view returns (uint256);
-
-    function wadToRay(uint256) external view returns (uint256);
-
-    function wadExp(int256) external pure returns (int256);
-
-    function wadLn(int256) external pure returns (int256);
-}
+import {IWadRayMath} from "../src/interfaces/IWadRayMath.sol";
 
 contract WadRayMathTest is Test {
     IWadRayMath public sut;
