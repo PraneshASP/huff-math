@@ -1,0 +1,77 @@
+/* Imports */
+#include "./helpers/TestHelpers.huff"
+#include "../../src/Math.huff"
+
+/* Tests */
+#define test TEST_ADD() = {
+    0x01                // [1]
+    0x02                // [2,1]
+    ADD_NUMBERS()       // [sum]
+    0x03                // [3,sum]
+    ASSERT_EQ()         // [3 == sum]
+    
+    0x4563918244f40000  // [5e18]            
+    0x4563918244f40000  // [5e18, 5e18]            
+    ADD_NUMBERS()       // [SUM]    
+    0x8ac7230489e80000  // [10e18, SUM]             
+    ASSERT_EQ()         // [10e18==SUM]     
+}
+
+#define test TEST_SUB() = {
+    0x02                // [2]
+    0x01                // [1,2]
+    SUB_NUMBERS()       // [diff]
+    0x01                // [1,diff]
+    ASSERT_EQ()         // [1 == diff]
+    
+    0x4563918244f40000  // [5e18]            
+    0x4563918244f40000  // [5e18, 5e18]            
+    SUB_NUMBERS()       // [diff]    
+    0x0                 // [0, diff]             
+    ASSERT_EQ()         // [0==diff]     
+}
+
+
+#define test TEST_MUL() = {
+    0x02                                // [2]
+    0x01                                // [1,2]
+    MULTIPLY_NUMBERS()                  // [diff]
+    0x02                                // [1,diff]
+    ASSERT_EQ()                         // [1 == diff]
+    
+    0x4563918244f40000                  // [5e18]            
+    0x4563918244f40000                  // [5e18, 5e18]            
+    MULTIPLY_NUMBERS()                  // [product]    
+    0x12ced32a16a1b11e8262889000000000  // [25e36, product]             
+    ASSERT_EQ()                         // [25e36==product]     
+}
+
+
+#define test TEST_DIV() = {
+    0x02                                // [2]
+    0x01                                // [1,2]
+    DIVIDE_NUMBERS()                    // [result]
+    0x02                                // [2,result]
+    ASSERT_EQ()                         // [1 == result]
+    
+    0x4563918244f40000                  // [5e18]            
+    0x4563918244f40000                  // [5e18, 5e18]            
+    DIVIDE_NUMBERS()                    // [result]    
+    0x1                                 // [1, result]             
+    ASSERT_EQ()                         // [1==result]     
+}
+
+#define test TEST_ABS() = {
+    0x02                                // [2]
+    0x01                                // [1,2]
+    ABS()                               // [result]
+    0x01                                // [1,result]
+    ASSERT_EQ()                         // [1 == result]
+    
+    0xde0b6b3a7640000                    // [1e18]            
+    0x4563918244f40000                   // [5e18, 1e18]            
+    ABS()                                // [result]    
+    0x3782dace9d900000                   // [4e18, result]             
+    ASSERT_EQ()                          // [4e18==result]     
+}
+
