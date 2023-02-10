@@ -9,7 +9,7 @@ contract MathForkTest is Test {
     IMath public math;
 
     function setUp() public {
-        vm.createSelectFork(vm.envString("INFURA_URL"));
+        vm.createSelectFork(vm.envString("RPC_URL"));
         math = IMath(0x999581D8C0BADA05502945fF3e490f41aE9e4102);
     }
 
