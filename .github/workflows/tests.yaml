@@ -23,6 +23,6 @@ jobs:
 
       - name: Run Tests
         run: forge test -vvv
-        with:
+        env:
           RPC_URL: ${{ secrets.RPC_URL }}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
