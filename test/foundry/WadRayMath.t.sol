@@ -10,9 +10,7 @@ contract WadRayMathTest is Test {
 
     /// @dev Setup the testing environment.
     function setUp() public {
-        sut = IWadRayMath(
-            HuffDeployer.deploy("../test/foundry/wrappers/WadRayMathWrapper")
-        );
+        sut = IWadRayMath(HuffDeployer.deploy("./wrappers/WadRayMathWrapper"));
     }
 
     function testDeployment() public {
