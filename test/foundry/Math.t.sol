@@ -11,9 +11,7 @@ contract MathTest is Test {
     uint256 public constant MIN = type(uint256).min;
 
     function setUp() public {
-        address addr = HuffDeployer.deploy(
-            "../test/foundry/wrappers/MathWrapper"
-        );
+        address addr = HuffDeployer.deploy("./wrappers/MathWrapper");
         // Hardcoding the deployed address as there are some issues with --ffi and huffc
         math = IMath(addr);
     }
