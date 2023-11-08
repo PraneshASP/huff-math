@@ -93,4 +93,29 @@ contract MathTest is Test {
         uint256 _result = a > b ? a - b : b - a;
         require(math.abs(a, b) == _result);
     }
+
+    function testModExp() public {
+        // Example test: 2^3 % 5 should equal 3
+        uint256 base = 2;
+        uint256 exponent = 3;
+        uint256 modulus = 5;
+        uint256 expected = 3;
+
+        uint256 result = math.modExp(base, exponent, modulus);
+        assertEq(result, expected, "modExp did not return the expected value");
+    }
+
+    function testModExp_fuzz(uint256 b, uint256 e, uint256 m) public {
+        // To avoid testing with modulus zero, which would revert
+        vm.assume(m > 1);
+        // To avoid gas issues, cap the exponent
+        uint256 exponent = e % 256;
+
+        // The actual modExp calculation can be complicated to emulate in Solidity due to gas constraints,
+        // so here we just test that the function does not revert and returns a value
+        // less than the modulus.
+        uint256 result = math.modExp(b, exponent, m);
+
+        assertLt(result, m, "modExp result should be less than the modulus");
+    }
 }

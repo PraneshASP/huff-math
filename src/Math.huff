@@ -42,4 +42,44 @@
     complete:
 }
 
+#define macro MODEXP() = takes (3) returns (1) {
+    // Input stack: [m, e, b]
+    // Check if modulus is zero, revert if it is
+    dup1                   // Duplicate the modulus to check it
+    0x00 eq                // Compare it to zero
+    jumpi MODULUS_NOT_ZERO
+    0x00 0x00 revert       // If it is zero, revert the transaction
+
+    MODULUS_NOT_ZERO:
+        // 2. Prepare for the staticcall to the precompiled contract at address 0x05
+        // The precompiled contract expects the data in memory, so we need to store our variables there.
+        0x80 0x24 calldataload // Load 'b' into memory starting at 0x80
+        0x80 mstore
+        0x60 0x24 calldataload // Load 'e' into memory starting at 0x60
+        0x60 mstore
+        0x40 0x24 calldataload // Load 'm' into memory starting at 0x40
+        0x40 mstore
+
+        // 3. Set up the memory pointer and length for input data
+        0x80                   // Start of input data in memory
+        0x60                   // Length of input data (3 * 32 bytes for b, e, m)
+
+        // 4. Perform the staticcall to the precompiled contract
+        0x05 gas               // Address of precompiled contract and allocated gas
+        staticcall
+
+        // 5. Check if the call was successful
+        iszero                 // If the call was not successful, the top of the stack will be 0
+        jumpi CALL_SUCCESSFUL
+        0x00 0x00 revert       // If not successful, revert the transaction
+
+    CALL_SUCCESSFUL:
+        // 6. Retrieve the result from memory
+        0x40 0x20 mload        // Load the result into the stack
+        swap1 pop              // Clean up the stack, remove input data length
+        swap1 pop              // Clean up the stack, remove input data start pointer
+
+        // The result of b^e % m is now on top of the stack
+}
+
  

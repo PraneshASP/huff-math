@@ -75,3 +75,24 @@
     ASSERT_EQ()                          // [4e18==result]     
 }
 
+#define test TEST_MODEXP() = {
+    // Test case 1: Simple modular exponentiation
+    // Using small numbers for easy manual verification: 2^3 % 5 = 3
+    0x05                                // [modulus = 5]
+    0x03                                // [exponent = 3, modulus]
+    0x02                                // [base = 2, exponent, modulus]
+    MODEXP()                            // [result]
+    0x03                                // [expected = 3, result]
+    ASSERT_EQ()                         // [3 == result]
+
+    // Test case 2: Larger numbers
+    // We need to choose numbers such that we can calculate the expected result manually or with a tool
+    // For example: (0x04)^2 % 0x05 = 0x04
+    0x05                                // [modulus = 5]
+    0x02                                // [exponent = 2, modulus]
+    0x04                                // [base = 4, exponent, modulus]
+    MODEXP()                            // [result]
+    0x04                                // [expected = 4, result]
+    ASSERT_EQ()                         // [4 == result]
+}
+
