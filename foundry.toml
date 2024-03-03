@@ -2,5 +2,6 @@
 src = 'src'
 out = 'artifacts'
 libs = ["node_modules", "lib"]
+evm_version = "shanghai"
 ffi=true
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

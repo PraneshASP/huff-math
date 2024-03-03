@@ -42,44 +42,47 @@
     complete:
 }
 
-#define macro MODEXP() = takes (3) returns (1) {
-    // Input stack: [m, e, b]
+#define macro MOD_EXP() = takes (3) returns (1) {
+    // Stack input: [base, exponent, modulus]
+
     // Check if modulus is zero, revert if it is
-    dup1                   // Duplicate the modulus to check it
+    dup1                   // Duplicate the modulus at the top of the stack
     0x00 eq                // Compare it to zero
-    jumpi MODULUS_NOT_ZERO
-    0x00 0x00 revert       // If it is zero, revert the transaction
+    jumpi($MODULUS_NOT_ZERO) // Jump if not equal to zero
+    0x00 0x00 revert       // If zero, revert
 
-    MODULUS_NOT_ZERO:
-        // 2. Prepare for the staticcall to the precompiled contract at address 0x05
-        // The precompiled contract expects the data in memory, so we need to store our variables there.
-        0x80 0x24 calldataload // Load 'b' into memory starting at 0x80
-        0x80 mstore
-        0x60 0x24 calldataload // Load 'e' into memory starting at 0x60
-        0x60 mstore
-        0x40 0x24 calldataload // Load 'm' into memory starting at 0x40
-        0x40 mstore
+    // Label for non-zero modulus
+    $MODULUS_NOT_ZERO:
 
-        // 3. Set up the memory pointer and length for input data
-        0x80                   // Start of input data in memory
-        0x60                   // Length of input data (3 * 32 bytes for b, e, m)
+    // Prepare memory for staticcall to precompiled contract at 0x05
+    // First, we need to store the input data (base, exponent, modulus) in memory.
+    // Assuming input is in the correct order on the stack: [base, exponent, modulus]
+    0x20 0x00 mstore       // Store base at memory 0x20
+    0x40 0x20 mstore       // Store exponent at memory 0x40
+    0x60 0x40 mstore       // Store modulus at memory 0x60
 
-        // 4. Perform the staticcall to the precompiled contract
-        0x05 gas               // Address of precompiled contract and allocated gas
-        staticcall
+    // Prepare input data for the precompiled contract
+    // Input format: <length of base> <base> <length of exponent> <exponent> <length of modulus> <modulus>
+    0x20 0x00 mstore       // Store length of base (0x20 bytes) at memory 0x00
+    0x20 0x20 mstore       // Store base at memory 0x20
+    0x20 0x40 mstore       // Store length of exponent (0x20 bytes) at memory 0x40
+    0x20 0x60 mstore       // Store exponent at memory 0x60
+    0x20 0x80 mstore       // Store length of modulus (0x20 bytes) at memory 0x80
+    0x20 0xa0 mstore       // Store modulus at memory 0xa0
 
-        // 5. Check if the call was successful
-        iszero                 // If the call was not successful, the top of the stack will be 0
-        jumpi CALL_SUCCESSFUL
-        0x00 0x00 revert       // If not successful, revert the transaction
+    // Set up the call to the precompiled contract
+    0x00 0x00 0x00 0x05 gas // Address of the precompiled contract (0x05) and gas for the call
+    0x00 0xc0              // Start of input data in memory and input data size (192 bytes)
+    0x00 0x20              // Start of output data in memory and output data size (32 bytes)
+    staticcall
 
-    CALL_SUCCESSFUL:
-        // 6. Retrieve the result from memory
-        0x40 0x20 mload        // Load the result into the stack
-        swap1 pop              // Clean up the stack, remove input data length
-        swap1 pop              // Clean up the stack, remove input data start pointer
+    // Check if the call was successful
+    iszero                 // If the call was not successful, the top of the stack will be 0
+    jumpi($CALL_SUCCESSFUL) // Jump if successful
+    0x00 0x00 revert       // If not successful, revert
 
-        // The result of b^e % m is now on top of the stack
+    // Label for call success
+    $CALL_SUCCESSFUL:
+    0x00 0x20 mload        // Load the result from memory location 0x00
+    // The result of base^exponent % modulus is now on top of the stack
 }
-
- 

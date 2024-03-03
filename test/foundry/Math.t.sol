@@ -96,10 +96,10 @@ contract MathTest is Test {
 
     function testModExp() public {
         // Example test: 2^3 % 5 should equal 3
-        uint256 base = 2;
+        uint256 base = 10;
         uint256 exponent = 3;
-        uint256 modulus = 5;
-        uint256 expected = 3;
+        uint256 modulus = 13;
+        uint256 expected = 12;
 
         uint256 result = math.modExp(base, exponent, modulus);
         assertEq(result, expected, "modExp did not return the expected value");
