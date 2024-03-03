@@ -6,6 +6,7 @@
 #define function multiplyNumbers(uint256,uint256) nonpayable returns (uint256)
 #define function divideNumbers(uint256,uint256) nonpayable returns (uint256)
 #define function abs(uint256,uint256) nonpayable returns (uint256)
+#define function modExp(uint256,uint256,uint256) nonpayable returns (uint256)
 
 #define macro ADD_WRAPPER() = takes (2) returns (1) {
     0x04 calldataload    // [num1]
@@ -47,7 +48,14 @@
     0x20 0x00 return     // []  
  }
 
-
+  #define macro MODEXP_WRAPPER() = takes (3) returns (1) {
+    0x04 calldataload    // [base]
+    0x24 calldataload    // [exponent, base]
+    0x44 calldataload    // [modulus, exponent, base]
+    MODEXP()             // [base^exponent mod modulus]
+    0x00 mstore          // []
+    0x20 0x00 return     // []  
+ }
 
 
 #define macro MAIN() = takes (0) returns (0) {
@@ -63,6 +71,7 @@
     dup1 0xd3f3cd7b eq  multiplyNumbers jumpi
     dup1 0x8fce12ed eq  divideNumbers   jumpi
     dup1 0xe093a157 eq  abs             jumpi
+    dup1 0x3148f14f eq  modExp          jumpi
 
 
     addNumbers:
@@ -76,6 +85,9 @@
 
      divideNumbers:
         DIVIDE_WRAPPER()
+    
+    modExp:
+        MODEXP_WRAPPER()
 
     abs:
         ABS_WRAPPER()

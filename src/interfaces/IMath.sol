@@ -12,4 +12,6 @@ interface IMath {
     function divideNumbers(uint256, uint256) external view returns (uint256);
 
     function abs(uint256, uint256) external view returns (uint256);
+
+    function modExp(uint256, uint256, uint256) external view returns (uint256);
 }
